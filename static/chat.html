@@ -1,1 +1,581 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Basil 🤖</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    
+    :root {
+      --engine-color: #ff6b6b;
+      --neon-cyan: #00ffff;
+      --neon-magenta: #ff00ff;
+    }
+    
+    body { 
+      font-family: 'Segoe UI', Arial, sans-serif; 
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0d0d0d 100%);
+      color:#fff; 
+      height:100dvh;
+      display:flex; 
+      flex-direction:column;
+      overflow:hidden;
+    }
 
+    body::before {
+      content:'';
+      position:fixed;
+      width:200%; height:200%;
+      background: 
+        linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0,0); }
+      100% { transform: translate(50px,50px); }
+    }
+
+    .header {
+      padding: 12px 20px;
+      text-align: center;
+      border-bottom: 2px solid var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(0,255,255,0.3);
+      background: rgba(0,0,0,0.5);
+      z-index: 10;
+      position:relative;
+    }
+
+    .header h1 {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-magenta);
+      letter-spacing: 3px;
+      font-size: 18px;
+    }
+
+    .header p {
+      color: var(--neon-magenta);
+      font-size: 10px;
+      margin-top: 4px;
+      letter-spacing: 2px;
+    }
+
+    .top-bar {
+      position:absolute;
+      top:12px;
+      right:12px;
+      display:flex;
+      gap:6px;
+      z-index: 20;
+    }
+
+    .top-bar button {
+      background: rgba(0,0,0,0.7);
+      border: 1px solid var(--neon-cyan);
+      border-radius: 8px;
+      color: var(--neon-cyan);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+
+    .top-bar button:hover { background: rgba(0,255,255,0.15); }
+
+    .btn-back {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 6px 10px;
+      background: rgba(0,0,0,0.7);
+      border: 1px solid var(--neon-cyan);
+      border-radius: 8px;
+      color: var(--neon-cyan);
+      cursor: pointer;
+      z-index: 20;
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .btn-back:hover { background: rgba(0,255,255,0.15); }
+
+    .engine-selector {
+      display: flex;
+      gap: 10px;
+      padding: 12px 15px;
+      overflow-x: auto;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(0,255,255,0.2);
+      z-index: 10;
+      position:relative;
+      scrollbar-width: thin;
+    }
+
+    .engine-selector::-webkit-scrollbar { height: 6px; }
+    .engine-selector::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 3px; }
+
+    .engine-btn {
+      padding: 10px 16px;
+      border: 2px solid #333;
+      background: #1a1a1a;
+      color: #fff;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 13px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .engine-btn:hover {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0,255,255,0.3);
+    }
+
+    .engine-btn.active {
+      border-color: var(--engine-color);
+      box-shadow: 0 0 20px var(--engine-color);
+      background: rgba(255,255,255,0.1);
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      overflow: hidden;
+      position: relative;
+      z-index: 5;
+      min-height: 0;
+    }
+
+    #chat {
+      flex: 1;
+      border: 2px solid var(--engine-color);
+      border-radius: 15px;
+      padding: 15px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.5);
+      box-shadow: 0 0 20px var(--engine-color), inset 0 0 20px rgba(0,0,0,0.3);
+      margin-bottom: 12px;
+      min-height: 0;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    #chat::-webkit-scrollbar { width: 8px; }
+    #chat::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+    #chat::-webkit-scrollbar-thumb { background: var(--engine-color); border-radius: 4px; }
+
+    .message {
+      margin: 10px 0;
+      padding: 12px 15px;
+      border-radius: 10px;
+      max-width: 85%;
+      animation: fadeIn 0.3s ease-in;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      background: linear-gradient(135deg, rgba(0,255,255,0.2), rgba(0,255,255,0.1));
+      border: 1px solid var(--neon-cyan);
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .message.bot {
+      background: linear-gradient(135deg, rgba(255,0,255,0.2), rgba(255,0,255,0.1));
+      border: 1px solid var(--neon-magenta);
+      margin-right: auto;
+    }
+
+    .message b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 11px;
+      opacity: 0.8;
+    }
+
+    .message.user b { color: var(--neon-cyan); }
+    .message.bot b { color: var(--neon-magenta); }
+
+    .input-area {
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+      position:relative;
+    }
+
+    #msg {
+      flex: 1;
+      padding: 12px 15px;
+      background: rgba(0,0,0,0.5);
+      border: 2px solid var(--neon-cyan);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.3s;
+      min-width: 0;
+    }
+
+    #msg:focus { box-shadow: 0 0 20px rgba(0,255,255,0.4); }
+    #msg::placeholder { color: rgba(255,255,255,0.4); }
+
+    .btn-send {
+      padding: 12px 22px;
+      background: linear-gradient(45deg, var(--neon-cyan), var(--neon-magenta));
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .btn-send:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0,255,255,0.6); }
+    .btn-send:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .image-mode #msg { border-color: var(--neon-magenta); }
+    .image-mode .btn-send { background: linear-gradient(45deg, var(--neon-magenta), #ff6b6b); }
+
+    .loading {
+      display: inline-block;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .generated-img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.3);
+      display: block;
+    }
+
+    @media (max-width: 480px) {
+      .header h1 { font-size: 15px; letter-spacing: 2px; }
+      .header p { font-size: 9px; }
+      .message { font-size: 13px; max-width: 90%; }
+      #msg { font-size: 14px; padding: 10px 12px; }
+      .btn-send { padding: 10px 16px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/" class="btn-back">← Home</a>
+  
+  <div class="top-bar">
+    <button onclick="newChat()" title="New Chat">➕ New</button>
+    <button onclick="exportChat()" title="Export">📤</button>
+  </div>
+
+  <div class="header">
+    <h1>TALK TO BASIL 🤖</h1>
+    <p>RESEARCH BELOW THE GROUND LEVEL</p>
+  </div>
+
+  <div class="engine-selector">
+    <button class="engine-btn active" data-engine="creative" onclick="setEngine('creative')">🎨 Creative</button>
+    <button class="engine-btn" data-engine="legal" onclick="setEngine('legal')">⚖️ Legal OSINT</button>
+    <button class="engine-btn" data-engine="uncensored" onclick="setEngine('uncensored')">🔓 Dolphin</button>
+    <button class="engine-btn" data-engine="youtube" onclick="setEngine('youtube')">🎬 YT Strategist</button>
+    <button class="engine-btn" data-engine="image" onclick="setEngine('image')">🖼️ Image Gen</button>
+  </div>
+
+  <div class="chat-container" id="chatContainer">
+    <div id="chat"></div>
+    
+    <div class="input-area">
+      <input type="text" id="msg" placeholder="Ask Basox anything..." />
+      <button class="btn-send" id="sendBtn" onclick="send()">Send ⚡</button>
+    </div>
+  </div>
+
+<script>
+// ===== CONFIG =====
+// ⚠️ CHANGE THIS to match the BASOX_TOKEN you set in Render env vars
+const BASOX_TOKEN = "basox-kenya-2026-x9";
+
+// ===== ENGINES =====
+const ENGINES = {
+  creative: { name: "Creative Writer", icon: "🎨", color: "#ff6b6b",
+    welcome: "Creative mode activated 🎨 Let's craft something beautiful. What story shall we tell?" },
+  legal: { name: "Legal OSINT", icon: "⚖️", color: "#4ecdc4",
+    welcome: "Legal OSINT mode ⚖️ Ready to investigate. What legal matter shall we research?" },
+  uncensored: { name: "Dolphin Research", icon: "🔓", color: "#ffe66d",
+    welcome: "Dolphin mode 🔓 No restrictions. Ask anything, get real answers." },
+  youtube: { name: "YT Strategist", icon: "🎬", color: "#ff006e",
+    welcome: "YT Strategist mode 🎬 Let's grow your channel. What niche are we dominating?" },
+  image: { name: "Image Generator", icon: "🖼️", color: "#00ffff",
+    welcome: "Image Gen mode 🖼️ Describe the image you want, and I'll create it!" }
+};
+
+// ===== STATE =====
+let currentEngine = "creative";
+let currentSessionId = null;
+let isImageMode = false;
+let isSending = false;
+
+// ===== INIT =====
+function init() {
+  setEngine('creative');
+}
+
+// ===== ENGINE SWITCH =====
+async function setEngine(engineKey) {
+  if (!ENGINES[engineKey]) return;
+  
+  currentEngine = engineKey;
+  const engine = ENGINES[engineKey];
+  currentSessionId = null;
+  
+  document.querySelectorAll('.engine-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.engine === engineKey) btn.classList.add('active');
+  });
+  
+  document.documentElement.style.setProperty('--engine-color', engine.color);
+  
+  isImageMode = (engineKey === 'image');
+  document.getElementById('chatContainer').classList.toggle('image-mode', isImageMode);
+  
+  document.getElementById('msg').placeholder = isImageMode 
+    ? "Describe the image you want..." 
+    : `Ask ${engine.name} anything...`;
+  
+  clearChat();
+  
+  if (isImageMode) {
+    addMessage(engine.welcome, false);
+  } else {
+    // Try to load latest session for this engine
+    const loaded = await loadLatestSession();
+    if (!loaded) addMessage(engine.welcome, false);
+  }
+}
+
+// ===== SESSION =====
+async function loadLatestSession() {
+  try {
+    const res = await fetch(`/api/sessions?engine=${currentEngine}`, {
+      headers: { "X-Basox-Token": BASIL-TOKEN }
+    });
+    if (!res.ok) return false;
+    const sessions = await res.json();
+    if (sessions.length === 0) return false;
+    
+    currentSessionId = sessions[0].id;
+    await loadMessages(currentSessionId);
+    return true;
+  } catch (e) {
+    console.error("Session load failed:", e);
+    return false;
+  }
+}
+
+async function loadMessages(sessionId) {
+  const res = await fetch(`/api/sessions/${sessionId}/messages`, {
+    headers: { "X-Basil-Token": BASOX_TOKEN }
+  });
+  if (!res.ok) return;
+  const messages = await res.json();
+  clearChat();
+  if (messages.length === 0) {
+    addMessage(ENGINES[currentEngine].welcome, false);
+    return;
+  }
+  for (const m of messages) {
+    addMessage(m.content, m.role === "user");
+  }
+}
+
+function newChat() {
+  currentSessionId = null;
+  clearChat();
+  addMessage(ENGINES[currentEngine].welcome, false);
+  document.getElementById('msg').focus();
+}
+
+async function exportChat() {
+  if (!currentSessionId) {
+    alert("No chat to export yet.");
+    return;
+  }
+  try {
+    const res = await fetch(`/api/export/${currentSessionId}`, {
+      headers: { "X-Basil-Token": BASIL_TOKEN }
+    });
+    if (!res.ok) throw new Error("Export failed");
+    const data = await res.json();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `basox-chat-${currentSessionId}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert("Export error: " + e.message);
+  }
+}
+
+// ===== MESSAGES =====
+function addMessage(text, isUser = false) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = isUser ? 'message user' : 'message bot';
+  div.innerHTML = `<b>${isUser ? 'You' : ENGINES[currentEngine].icon + ' ' + ENGINES[currentEngine].name}:</b> ${escapeHtml(text)}`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function clearChat() {
+  document.getElementById('chat').innerHTML = '';
+}
+
+function showLoading() {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'message bot';
+  div.innerHTML = `<span class="loading">thinking... 🤔</span>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function removeLoading(el) {
+  if (el && el.parentNode) el.parentNode.removeChild(el);
+}
+
+// ===== SEND =====
+async function send() {
+  if (isSending) return;
+  
+  const input = document.getElementById('msg');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  isSending = true;
+  document.getElementById('sendBtn').disabled = true;
+  
+  addMessage(text, true);
+  input.value = '';
+  
+  const loading = showLoading();
+  
+  try {
+    if (isImageMode) {
+      await generateImage(text, loading);
+    } else {
+      await sendToAI(text, loading);
+    }
+  } catch (error) {
+    removeLoading(loading);
+    addMessage("Error: " + error.message, false);
+  } finally {
+    isSending = false;
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+  }
+}
+
+async function sendToAI(text, loading) {
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Basox-Token": BASIL_TOKEN
+    },
+    body: JSON.stringify({
+      engine: currentEngine,
+      message: text,
+      session_id: currentSessionId
+    })
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error("API " + res.status + ": " + errBody);
+  }
+
+  const data = await res.json();
+  currentSessionId = data.session_id;
+
+  removeLoading(loading);
+  addMessage(data.reply, false);
+}
+
+// ===== IMAGE =====
+async function generateImage(prompt, loading) {
+  const encodedPrompt = encodeURIComponent(prompt);
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=600&nologo=true`;
+
+  const img = document.createElement('img');
+  img.className = 'generated-img';
+  img.alt = prompt;
+
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("Image generation timeout")), 60000);
+    img.onload = () => { clearTimeout(timer); resolve(); };
+    img.onerror = () => { clearTimeout(timer); reject(new Error("Failed to generate image")); };
+    img.src = imageUrl;
+  });
+
+  removeLoading(loading);
+
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'message bot';
+  div.innerHTML = `<b>🖼️ Basil Image:</b><br>`;
+  div.appendChild(img);
+
+  const promptDiv = document.createElement('div');
+  promptDiv.style.marginTop = '10px';
+  promptDiv.style.fontSize = '12px';
+  promptDiv.style.opacity = '0.7';
+  promptDiv.textContent = 'Prompt: ' + prompt;
+  div.appendChild(promptDiv);
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// ===== EVENTS =====
+document.getElementById('msg').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') send();
+});
+
+window.onload = init;
+</script>
+</body>
+      </html>
