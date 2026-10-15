@@ -1,1 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Basil 🤖</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
 
+    body { 
+      font-family: 'Segoe UI', Arial, sans-serif; 
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0d0d0d 100%);
+      color:#fff; 
+      min-height:100dvh;
+      display:flex; 
+      flex-direction:column; 
+      justify-content:center; 
+      align-items:center; 
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:20px 0;
+      position:relative;
+    }
+
+    body::before {
+      content:'';
+      position:fixed;
+      width:200%; height:200%;
+      background: 
+        linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0,0); }
+      100% { transform: translate(50px,50px); }
+    }
+
+    .scene {
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      z-index:1;
+      max-width:500px;
+      width:90%;
+      padding:10px;
+      max-height:100dvh;
+      overflow-y:auto;
+    }
+
+    .ostrich-container {
+      position:relative;
+      width:100%;
+      max-width:400px;
+      height:auto;
+      aspect-ratio: 4/5;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+
+    .ostrich-svg {
+      width:100%;
+      height:100%;
+      max-height:40vh;
+      filter: drop-shadow(0 0 20px rgba(0,255,255,0.3));
+    }
+
+    .ostrich-frame {
+      position:relative;
+      padding:20px;
+      border-radius:20px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid rgba(0,255,255,0.3);
+      box-shadow: 
+        0 0 30px rgba(0,255,255,0.2),
+        0 0 60px rgba(255,0,255,0.1),
+        inset 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .ostrich-frame::after {
+      content:'';
+      position:absolute;
+      inset:0;
+      border-radius:20px;
+      background: linear-gradient(135deg, rgba(0,255,255,0.1) 0%, transparent 50%, rgba(255,0,255,0.1) 100%);
+      pointer-events:none;
+    }
+
+    .tagline { 
+      color:#00ffff; 
+      font-size:22px; 
+      font-weight:bold; 
+      margin-top:25px; 
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #ff00ff;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-align:center;
+      animation: taglineGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes taglineGlow {
+      0%,100% { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #ff00ff; }
+      50% { text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, 0 0 60px #ff00ff, 0 0 80px #ff00ff; }
+    }
+
+    .subtitle {
+      color:#ff00ff;
+      font-size:13px;
+      margin-top:10px;
+      letter-spacing:2px;
+      text-shadow: 0 0 10px #ff00ff;
+      text-align:center;
+    }
+
+    .new-chat { 
+      margin-top:35px; 
+      padding:16px 45px; 
+      background: transparent;
+      border:2px solid #00ffff;
+      border-radius:40px; 
+      color:#00ffff; 
+      font-weight:bold; 
+      font-size:16px; 
+      cursor:pointer;
+      text-transform:uppercase;
+      letter-spacing:3px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.4), inset 0 0 20px rgba(0,255,255,0.1);
+      transition: all 0.3s;
+      position:relative;
+      overflow:hidden;
+      z-index:4;
+    }
+
+    .new-chat::before {
+      content:'';
+      position:absolute;
+      top:0; left:-100%;
+      width:100%; height:100%;
+      background: linear-gradient(90deg, transparent, rgba(255,0,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .new-chat:hover::before { left:100%; }
+
+    .new-chat:hover { 
+      box-shadow: 0 0 40px rgba(0,255,255,0.8), inset 0 0 30px rgba(0,255,255,0.2);
+      transform: scale(1.05);
+      color:#fff;
+      border-color:#ff00ff;
+    }
+
+    .version {
+      position:fixed;
+      bottom:15px;
+      right:15px;
+      color:rgba(255,255,255,0.3);
+      font-size:11px;
+      letter-spacing:1px;
+      z-index:10;
+    }
+
+    .ostrich-body {
+      animation: subtleFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes subtleFloat {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .head-glow {
+      animation: headPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes headPulse {
+      0%,100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    @media (max-width: 480px) {
+      .ostrich-frame { padding:12px; }
+      .tagline { font-size:17px; letter-spacing:2px; }
+      .new-chat { padding:14px 35px; font-size:14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="ostrich-frame">
+      <div class="ostrich-container">
+        <svg class="ostrich-svg" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#5a1a1a;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#3a0f0f;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="neckGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#ffa07a;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#ff8c69;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="tailGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#e0ffff;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#00ffff;stop-opacity:1" />
+            </linearGradient>
+            <radialGradient id="headGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" style="stop-color:#ff00ff;stop-opacity:0.8" />
+              <stop offset="50%" style="stop-color:#00ffff;stop-opacity:0.4" />
+              <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0" />
+            </radialGradient>
+          </defs>
+
+          <line x1="50" y1="380" x2="350" y2="380" stroke="#00ffff" stroke-width="3" opacity="0.8"/>
+          <line x1="50" y1="385" x2="350" y2="385" stroke="#00ffff" stroke-width="1" opacity="0.3"/>
+
+          <ellipse class="head-glow" cx="180" cy="420" rx="40" ry="30" fill="url(#headGlow)"/>
+
+          <line x1="120" y1="400" x2="120" y2="480" stroke="#00ffff" stroke-width="2" opacity="0.4"/>
+          <line x1="160" y1="410" x2="160" y2="490" stroke="#ff00ff" stroke-width="2" opacity="0.3"/>
+          <line x1="200" y1="405" x2="200" y2="485" stroke="#00ffff" stroke-width="2" opacity="0.5"/>
+          <line x1="240" y1="415" x2="240" y2="495" stroke="#ff00ff" stroke-width="2" opacity="0.4"/>
+          <line x1="280" y1="400" x2="280" y2="480" stroke="#00ffff" stroke-width="2" opacity="0.3"/>
+
+          <g class="ostrich-body">
+            <g transform="translate(260, 180)">
+              <ellipse cx="0" cy="0" rx="35" ry="50" fill="url(#tailGrad)" opacity="0.9"/>
+              <ellipse cx="15" cy="-10" rx="25" ry="40" fill="#ffffff" opacity="0.8"/>
+              <ellipse cx="-10" cy="5" rx="20" ry="35" fill="#e0ffff" opacity="0.7"/>
+            </g>
+
+            <ellipse cx="200" cy="220" rx="80" ry="70" fill="url(#bodyGrad)" stroke="#ff006e" stroke-width="2"/>
+
+            <path d="M 150 200 Q 170 180 200 190" stroke="#7a2a2a" stroke-width="2" fill="none"/>
+            <path d="M 160 220 Q 180 200 210 210" stroke="#7a2a2a" stroke-width="2" fill="none"/>
+            <path d="M 170 240 Q 190 220 220 230" stroke="#7a2a2a" stroke-width="2" fill="none"/>
+
+            <path d="M 160 210 Q 140 230 150 260 Q 170 270 190 250" fill="#4a1515" stroke="#ff006e" stroke-width="1"/>
+
+            <path d="M 160 250 Q 140 300 150 350 Q 155 380 170 400" 
+                  fill="none" stroke="url(#neckGrad)" stroke-width="18" stroke-linecap="round"/>
+
+            <ellipse cx="175" cy="405" rx="15" ry="12" fill="#ffa07a"/>
+
+            <line x1="180" y1="290" x2="175" y2="380" stroke="#ffa07a" stroke-width="12" stroke-linecap="round"/>
+            <line x1="220" y1="290" x2="225" y2="380" stroke="#ffa07a" stroke-width="12" stroke-linecap="round"/>
+
+            <circle cx="177" cy="335" r="6" fill="#00ffff" opacity="0.8"/>
+            <circle cx="222" cy="335" r="6" fill="#00ffff" opacity="0.8"/>
+
+            <path d="M 170 380 L 165 395 M 175 380 L 175 395 M 180 380 L 185 395" 
+                  stroke="#ffa07a" stroke-width="4" stroke-linecap="round"/>
+            <path d="M 220 380 L 215 395 M 225 380 L 225 395 M 230 380 L 235 395" 
+                  stroke="#ffa07a" stroke-width="4" stroke-linecap="round"/>
+          </g>
+
+          <circle cx="100" cy="420" r="3" fill="#00ffff" opacity="0.6">
+            <animate attributeName="cy" values="420;400;420" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="300" cy="430" r="2" fill="#ff00ff" opacity="0.5">
+            <animate attributeName="cy" values="430;410;430" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="250" cy="440" r="2" fill="#00ffff" opacity="0.4">
+            <animate attributeName="cy" values="440;420;440" dur="3.5s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </div>
+    </div>
+
+    <div class="tagline">RESEARCH BELOW THE GROUND LEVEL</div>
+    <div class="subtitle">🦤 Basil digs deeper than any AI</div>
+
+    <button class="new-chat" onclick="window.location.href='chat.html'">NEW CHAT ⚡</button>
+  </div>
+
+  <div class="version">BASIL v1.0</div>
+</body>
+  </html>
